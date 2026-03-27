@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import logo from '../assets/YTSoftware.jpeg';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -80,8 +81,13 @@ const Navbar = () => {
         }`}
       >
         <div className="page-container flex h-[72px] items-center justify-between text-slate-900">
-          <div className="text-base md:text-lg font-bold tracking-wide">
-            YT Software Solutions
+          <div className="flex items-center gap-2">
+            <img
+              src={logo}
+              alt="YT Software Solutions"
+              className="h-[60px] w-auto object-contain"
+              loading="eager"
+            />
           </div>
 
         <div className="hidden md:flex items-center gap-6">

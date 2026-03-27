@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { motion } from 'framer-motion';
+import { GraduationCap, Laptop2, LineChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const techIcons = ['PY', 'JAVA', 'HTML', 'DB'];
@@ -33,10 +34,32 @@ const Hero = () => {
               Build Your Tech Career With Us
             </motion.h1>
 
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
+              className="mt-4 flex flex-wrap items-center gap-3 justify-center lg:justify-start"
+            >
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/90">
+                <GraduationCap size={14} className="text-white" />
+                Training
+              </span>
+              <span className="text-white/50">•</span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/90">
+                <Laptop2 size={14} className="text-white" />
+                Development
+              </span>
+              <span className="text-white/50">•</span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/90">
+                <LineChart size={14} className="text-white" />
+                Placement Assistance
+              </span>
+            </motion.div>
+
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
+              transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
               className="mt-4 text-lg text-slate-100/90 leading-relaxed max-w-md mx-auto lg:mx-0"
             >
               Industry-aligned training, hands-on projects, and placement support
