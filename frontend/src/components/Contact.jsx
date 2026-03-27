@@ -1,9 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: 'Course Inquiry',
+    message: ''
+  });
+  const [status, setStatus] = useState({ type: 'idle', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const apiBaseUrl =
+    import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+  const handleChange = (field) => (event) => {
+    setFormData((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setStatus({ type: 'idle', message: '' });
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error || 'Unable to send message');
+      }
+      setStatus({
+        type: 'success',
+        message: 'Thanks! Your message has been sent successfully.'
+      });
+      setFormData({
+        name: '',
+        email: '',
+        subject: 'Course Inquiry',
+        message: ''
+      });
+    } catch (err) {
+      setStatus({
+        type: 'error',
+        message: err.message || 'Something went wrong. Please try again.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section id="contact" className="section bg-[#F8FAFC]">
       <div className="mx-auto w-full max-w-6xl px-6">
@@ -21,12 +71,14 @@ const Contact = () => {
         </motion.div>
 
         <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl lg:grid-cols-[1.1fr_0.9fr]">
-          <form className="p-8 md:p-10 space-y-6">
+          <form className="p-8 md:p-10 space-y-6" onSubmit={handleSubmit}>
             <div>
               <label className="text-sm font-medium text-slate-700">Full Name</label>
               <input
                 type="text"
                 placeholder="John Doe"
+                value={formData.name}
+                onChange={handleChange('name')}
                 className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0A66C2] focus:ring-2 focus:ring-[#0A66C2]/20"
               />
             </div>
@@ -35,12 +87,16 @@ const Contact = () => {
               <input
                 type="email"
                 placeholder="john@company.com"
+                value={formData.email}
+                onChange={handleChange('email')}
                 className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0A66C2] focus:ring-2 focus:ring-[#0A66C2]/20"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700">Subject</label>
               <select
+                value={formData.subject}
+                onChange={handleChange('subject')}
                 className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#0A66C2] focus:ring-2 focus:ring-[#0A66C2]/20"
               >
                 <option>Course Inquiry</option>
@@ -54,14 +110,28 @@ const Contact = () => {
               <textarea
                 rows={5}
                 placeholder="Tell us about your requirements..."
+                value={formData.message}
+                onChange={handleChange('message')}
                 className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0A66C2] focus:ring-2 focus:ring-[#0A66C2]/20"
               />
             </div>
+            {status.type !== 'idle' && (
+              <div
+                className={`rounded-lg px-4 py-3 text-sm ${
+                  status.type === 'success'
+                    ? 'bg-green-50 text-green-700'
+                    : 'bg-red-50 text-red-700'
+                }`}
+              >
+                {status.message}
+              </div>
+            )}
             <button
               type="submit"
-              className="w-full rounded-lg bg-[#0A66C2] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg hover:scale-[1.02]"
+              disabled={isSubmitting}
+              className="w-full rounded-lg bg-[#0A66C2] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Send Message
+              {isSubmitting ? 'Sending...' : 'Send Message'}
             </button>
           </form>
 

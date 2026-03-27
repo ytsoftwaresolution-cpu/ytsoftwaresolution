@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 dotenv.config({ override: true });
 
@@ -11,39 +11,31 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-const SMTP_HOST = process.env.SMTP_HOST || '';
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || '0', 10);
-const SMTP_USER = process.env.SMTP_USER || '';
-const SMTP_PASS = process.env.SMTP_PASS || '';
-const SMTP_FROM = process.env.SMTP_FROM || '';
+const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+const RESEND_FROM = process.env.RESEND_FROM || '';
 const CONTACT_TO = process.env.CONTACT_TO || '';
-const SMTP_SECURE = (process.env.SMTP_SECURE || '').toLowerCase() === 'true';
-
-const canSendEmail = Boolean(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS && SMTP_FROM);
-const mailer = canSendEmail
-  ? nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_SECURE || SMTP_PORT === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS }
-    })
-  : null;
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+const canSendEmail = Boolean(resend && RESEND_FROM && CONTACT_TO);
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
 });
 
 app.post('/api/messages', async (req, res) => {
-  const { name, email, message } = req.body || {};
+  const { name, email, subject, message } = req.body || {};
   if (!name || !email || !message) {
-    return res.status(400).json({ success: false, error: 'Name, email, and message are required' });
+    return res
+      .status(400)
+      .json({ success: false, error: 'Name, email, and message are required' });
   }
-  if (!mailer || !CONTACT_TO) {
-    return res.status(500).json({ success: false, error: 'Email service not configured' });
+  if (!canSendEmail) {
+    return res
+      .status(500)
+      .json({ success: false, error: 'Email service not configured' });
   }
 
   try {
-    const subject = 'New Contact Form Submission';
+    const mailSubject = subject || 'New Contact Form Submission';
     const html = `
       <h2>New Contact Message</h2>
       <p><strong>Name:</strong> ${name}</p>
@@ -51,16 +43,54 @@ app.post('/api/messages', async (req, res) => {
       <p><strong>Message:</strong></p>
       <p>${String(message).replace(/\n/g, '<br/>')}</p>
     `;
-    await mailer.sendMail({
-      from: SMTP_FROM,
+    await resend.emails.send({
+      from: RESEND_FROM,
       to: CONTACT_TO,
-      replyTo: email,
-      subject,
+      reply_to: email,
+      subject: mailSubject,
       html
     });
     return res.json({ success: true });
   } catch (err) {
-    return res.status(500).json({ success: false });
+    return res.status(500).json({ success: false, error: 'Failed to send email' });
+  }
+});
+
+app.post('/api/enroll', async (req, res) => {
+  const { name, email, phone, category, course, message } = req.body || {};
+  if (!name || !email || !phone) {
+    return res.status(400).json({
+      success: false,
+      error: 'Name, email, and phone are required'
+    });
+  }
+  if (!canSendEmail) {
+    return res
+      .status(500)
+      .json({ success: false, error: 'Email service not configured' });
+  }
+
+  try {
+    const html = `
+      <h2>New Enrollment Request</h2>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone:</strong> ${phone}</p>
+      <p><strong>Category:</strong> ${category || 'General Inquiry'}</p>
+      <p><strong>Course:</strong> ${course || 'All Courses'}</p>
+      <p><strong>Message:</strong></p>
+      <p>${String(message || '').replace(/\n/g, '<br/>')}</p>
+    `;
+    await resend.emails.send({
+      from: RESEND_FROM,
+      to: CONTACT_TO,
+      reply_to: email,
+      subject: 'New Course Enrollment',
+      html
+    });
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: 'Failed to send email' });
   }
 });
 

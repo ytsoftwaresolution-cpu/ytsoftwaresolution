@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { courses } from '../data/courses';
 import { courseCategories } from '../data/courseCategories';
@@ -7,6 +7,16 @@ const EnrollPage = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const slug = params.get('course');
+  const apiBaseUrl =
+    import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  });
+  const [status, setStatus] = useState({ type: 'idle', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedCourse = useMemo(
     () => courses.find((course) => course.slug === slug),
@@ -20,6 +30,49 @@ const EnrollPage = () => {
       return category.courses.some((course) => course.slug === slug);
     });
   }, [slug]);
+
+  const handleChange = (field) => (event) => {
+    setFormData((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setStatus({ type: 'idle', message: '' });
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/enroll`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          category: selectedCategory?.title || 'General Inquiry',
+          course: selectedCourse?.title || 'All Courses'
+        })
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error || 'Unable to submit enrollment');
+      }
+      setStatus({
+        type: 'success',
+        message: 'Enrollment submitted! Our team will contact you shortly.'
+      });
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        message: ''
+      });
+    } catch (err) {
+      setStatus({
+        type: 'error',
+        message: err.message || 'Something went wrong. Please try again.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="bg-[#F8FAFC]">
@@ -52,7 +105,7 @@ const EnrollPage = () => {
                 )}
               </div>
 
-              <form className="mt-6 space-y-5">
+              <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
                 <div>
                   <label className="text-sm font-medium text-slate-700">
                     Full Name
@@ -60,6 +113,8 @@ const EnrollPage = () => {
                   <input
                     type="text"
                     placeholder="Your full name"
+                    value={formData.name}
+                    onChange={handleChange('name')}
                     className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0A66C2] focus:ring-2 focus:ring-[#0A66C2]/20"
                   />
                 </div>
@@ -70,6 +125,8 @@ const EnrollPage = () => {
                   <input
                     type="tel"
                     placeholder="Your mobile number"
+                    value={formData.phone}
+                    onChange={handleChange('phone')}
                     className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0A66C2] focus:ring-2 focus:ring-[#0A66C2]/20"
                   />
                 </div>
@@ -80,6 +137,8 @@ const EnrollPage = () => {
                   <input
                     type="email"
                     placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={handleChange('email')}
                     className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0A66C2] focus:ring-2 focus:ring-[#0A66C2]/20"
                   />
                 </div>
@@ -112,14 +171,28 @@ const EnrollPage = () => {
                   <textarea
                     rows={4}
                     placeholder="Share your preferred timings or questions..."
+                    value={formData.message}
+                    onChange={handleChange('message')}
                     className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0A66C2] focus:ring-2 focus:ring-[#0A66C2]/20"
                   />
                 </div>
+                {status.type !== 'idle' && (
+                  <div
+                    className={`rounded-lg px-4 py-3 text-sm ${
+                      status.type === 'success'
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-red-50 text-red-700'
+                    }`}
+                  >
+                    {status.message}
+                  </div>
+                )}
                 <button
                   type="submit"
-                  className="w-full rounded-lg bg-[#0A66C2] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg hover:scale-[1.01]"
+                  disabled={isSubmitting}
+                  className="w-full rounded-lg bg-[#0A66C2] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Submit Enrollment
+                  {isSubmitting ? 'Submitting...' : 'Submit Enrollment'}
                 </button>
               </form>
             </div>
