@@ -113,7 +113,7 @@ const TopCourses = ({ limit }) => {
 
                 <div className="mt-auto pt-3 flex gap-2">
                   <Link
-                    to="/contact"
+                    to={`/enroll?course=${course.slug}`}
                     className="rounded-md bg-[#0A66C2] px-3 py-2 text-[11px] font-semibold text-white shadow-sm transition hover:shadow-md hover:scale-[1.02] text-center"
                   >
                     Enroll Now

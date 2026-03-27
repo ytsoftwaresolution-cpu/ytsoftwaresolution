@@ -1,9 +1,10 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { BookOpen, CheckCircle2 } from 'lucide-react';
-import { courses } from '../data/courses';
+import React, { useState } from 'react';
+import { CheckCircle2, Plus, Minus } from 'lucide-react';
+import { courseCategories } from '../data/courseCategories';
 
 const CoursesPage = () => {
+  const [openIndex, setOpenIndex] = useState(0);
+
   return (
     <div className="bg-[#f5f5f5]">
       <section className="py-14">
@@ -13,33 +14,45 @@ const CoursesPage = () => {
               Course Listing
             </h1>
             <p className="mt-3 text-slate-600">
-              Browse our programs and view full details for each course.
+              Explore our complete course structure by category.
             </p>
           </div>
 
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course) => (
-              <div
-                key={course.title}
-                className="rounded-2xl bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_rgba(15,23,42,0.18)]"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E7F0FB] text-[#1565C0]">
-                  <BookOpen size={18} />
-                </div>
-                <h2 className="mt-4 text-lg font-semibold text-slate-900">
-                  {course.title}
-                </h2>
-                <p className="mt-2 text-sm text-slate-600 line-clamp-2">
-                  {course.shortDescription}
-                </p>
-                <Link
-                  to={`/course/${course.slug}`}
-                  className="mt-4 inline-flex rounded-lg bg-[#0A66C2] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:shadow-md hover:scale-[1.02]"
+          <div className="mt-8 space-y-4">
+            {courseCategories.map((category, index) => {
+              const isOpen = openIndex === index;
+              return (
+                <div
+                  key={category.title}
+                  className="overflow-hidden rounded-2xl bg-white shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
                 >
-                  View Details
-                </Link>
-              </div>
-            ))}
+                  <button
+                    type="button"
+                    onClick={() => setOpenIndex(isOpen ? -1 : index)}
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-[#F2F6FB]"
+                  >
+                    <span className="text-base md:text-lg font-semibold text-slate-900">
+                      {category.title}
+                    </span>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-[#0A66C2]">
+                      {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="border-t border-slate-200 px-5 py-4">
+                      <ul className="grid gap-2 text-sm text-slate-700 sm:grid-cols-2 lg:grid-cols-3">
+                        {category.courses.map((course) => (
+                          <li key={course.slug} className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-[#0A66C2]" />
+                            <span>{course.title}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-10 rounded-2xl bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.12)]">

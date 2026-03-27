@@ -18,7 +18,7 @@ const CtaSection = () => {
             Join thousands of learners who transformed their careers with us.
           </p>
           <Link
-            to="/contact"
+            to="/enroll"
             className="mt-6 inline-flex rounded-full bg-white px-8 py-3 text-sm font-semibold text-slate-900 shadow-md transition hover:scale-[1.02]"
           >
             Enroll Now

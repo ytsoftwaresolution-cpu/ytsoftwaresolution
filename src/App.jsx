@@ -10,6 +10,7 @@ import CompanyPage from './pages/CompanyPage';
 import CourseDetailPage from './pages/CourseDetailPage';
 import CareersPage from './pages/CareersPage';
 import ProductsPage from './pages/ProductsPage';
+import EnrollPage from './pages/EnrollPage';
 
 export default function App() {
   const location = useLocation();
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/features" element={<FeaturesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/enroll" element={<EnrollPage />} />
         <Route path="/company" element={<CompanyPage />} />
         <Route path="/careers" element={<CareersPage />} />
         <Route path="/products" element={<ProductsPage />} />

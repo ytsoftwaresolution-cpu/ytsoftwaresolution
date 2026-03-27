@@ -40,19 +40,86 @@ const CourseDetailPage = () => {
         <div className="mx-auto w-full max-w-6xl px-4">
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2 rounded-2xl bg-white p-6 shadow-md">
-              <h2 className="text-xl font-semibold text-slate-900">Key Topics</h2>
-              <ul className="mt-4 grid gap-3 text-sm text-slate-700">
-                {course.topics.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <ListChecks size={16} className="text-[#0A66C2] mt-0.5" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+              {course.overview && (
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">
+                    Overview
+                  </h2>
+                  <p className="mt-3 text-sm text-slate-700 leading-relaxed">
+                    {course.overview}
+                  </p>
+                </div>
+              )}
+
+              {course.courseContent ? (
+                <div className={course.overview ? 'mt-6' : ''}>
+                  <h2 className="text-xl font-semibold text-slate-900">
+                    Course Content
+                  </h2>
+                  <ul className="mt-4 grid gap-3 text-sm text-slate-700">
+                    {course.courseContent.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <ListChecks size={16} className="text-[#0A66C2] mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">
+                    Key Topics
+                  </h2>
+                  <ul className="mt-4 grid gap-3 text-sm text-slate-700">
+                    {course.topics.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <ListChecks size={16} className="text-[#0A66C2] mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {course.tools && (
+                <div className="mt-6">
+                  <h2 className="text-xl font-semibold text-slate-900">
+                    Tools & Technologies
+                  </h2>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {course.tools.map((tool) => (
+                      <li
+                        key={tool}
+                        className="rounded-full bg-[#E7F0FB] px-3 py-1 text-xs font-semibold text-[#0A66C2]"
+                      >
+                        {tool}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {course.keyFeatures && (
+                <div className="mt-6">
+                  <h2 className="text-xl font-semibold text-slate-900">
+                    Key Features
+                  </h2>
+                  <ul className="mt-4 grid gap-3 text-sm text-slate-700">
+                    {course.keyFeatures.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <ListChecks size={16} className="text-[#0A66C2] mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div className="rounded-2xl bg-white p-6 shadow-md">
-              <h2 className="text-xl font-semibold text-slate-900">Course Info</h2>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Course Info
+              </h2>
               <p className="mt-2 text-sm text-slate-600">
                 Key details and career outcomes for this program.
               </p>
@@ -63,14 +130,17 @@ const CourseDetailPage = () => {
                 </div>
                 <div className="flex items-start gap-2 text-sm text-slate-700">
                   <Briefcase size={16} className="text-[#0A66C2] mt-0.5" />
-                  <span>Career Opportunities: {course.roles.join(', ')}</span>
+                  <span>
+                    Career Opportunities:{' '}
+                    {course.roles ? course.roles.join(', ') : '—'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <Layers size={16} className="text-[#0A66C2]" />
                   <span>Program Level: Beginner to Advanced</span>
                 </div>
                 <Link
-                  to="/contact"
+                  to={`/enroll?course=${course.slug}`}
                   className="mt-2 rounded-lg bg-[#0A66C2] px-6 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition text-center"
                 >
                   Enroll Now
